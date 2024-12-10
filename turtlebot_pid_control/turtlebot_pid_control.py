@@ -54,8 +54,8 @@ class TurtleBotController(Node):
         r = np.sqrt((self.x)**2 + (self.y)**2)
 
         # Check if close to the target
-        if (abs(self.x - self.targets[self.target_index][0]) < 0.01 and
-                abs(self.y - self.targets[self.target_index][1]) < 0.01):
+        if (abs(self.x - self.targets[self.target_index][0]) < 0.1 and
+                abs(self.y - self.targets[self.target_index][1]) < 0.1):
             self.get_logger().info(f"reached target: {self.targets[self.target_index]}")
             self.target_index += 1
             self.target_index %= len(self.targets)
@@ -65,21 +65,25 @@ class TurtleBotController(Node):
         x_target = self.targets[self.target_index][0]
         y_target = self.targets[self.target_index][1]
 
-        k_w = 2
+        k_w = 1
+        k_v = 0.5
         # _theta = _theta if _theta >= 0 else 2 * np.pi + _theta
         error_w = np.arctan2(y_target - self.y, x_target - self.x) - self.theta
         while error_w < 0:
             error_w += 2 * np.pi
         _w = k_w * error_w
 
-        k_v = 1
         error_v = np.sqrt((x_target - self.x)**2 + (y_target - self.y)**2)
         _v = k_v * error_v
 
         _d = abs(_v) + abs(_w * r)
 
-        v = _v / _d * 2
-        w = _w / _d * 2
+        # v = _v / _d * 2
+        # w = _w / _d * 2
+
+        v = _v
+        w = _w
+        # v = 2.0
 
         # Publish the velocity
         cmd = Twist()
@@ -120,7 +124,7 @@ def main(args=None):
     targets = np.array([[1, 0], [0, 1], [-1, 0], [0, -1]])
 
     # Run controller
-    controller = TurtleBotController(T=25.0, dt=0.01, targets=targets)
+    controller = TurtleBotController(T=25.0, dt=0.00001, targets=targets)
     rclpy.spin(controller)
 
     # Optional: Plot trajectory
